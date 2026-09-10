@@ -1,6 +1,6 @@
 <?php
 /**
- * API Handler for Alex Travel Consultant
+ * API Handler for Alex Travel Consultant - Using GROQ (FREE)
  */
 
 if (!defined('ABSPATH')) {
@@ -10,8 +10,8 @@ if (!defined('ABSPATH')) {
 class AlexAPI {
     
     private static $instance = null;
-    private $openai_key = '';
-    private $api_base = 'https://api.openai.com/v1';
+    private $groq_key = '';
+    private $groq_api_url = 'https://api.groq.com/openai/v1/chat/completions';
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -21,7 +21,7 @@ class AlexAPI {
     }
     
     public function __construct() {
-        $this->openai_key = get_option('alex_openai_api_key', '');
+        $this->groq_key = get_option('alex_groq_api_key', '');
     }
     
     /**
@@ -51,10 +51,10 @@ class AlexAPI {
     }
     
     /**
-     * Get AI response from OpenAI
+     * Get AI response from Groq API (COMPLETELY FREE)
      */
     private function get_ai_response($user_message, $conversation_context) {
-        if (empty($this->openai_key)) {
+        if (empty($this->groq_key)) {
             return $this->get_fallback_response($user_message);
         }
         
@@ -78,31 +78,39 @@ class AlexAPI {
             'content' => $user_message
         );
         
+        // Call Groq API (FREE)
         $response = wp_remote_post(
-            $this->api_base . '/chat/completions',
+            $this->groq_api_url,
             array(
                 'headers' => array(
-                    'Authorization' => 'Bearer ' . $this->openai_key,
+                    'Authorization' => 'Bearer ' . $this->groq_key,
                     'Content-Type' => 'application/json'
                 ),
                 'body' => wp_json_encode(array(
-                    'model' => 'gpt-3.5-turbo',
+                    'model' => 'mixtral-8x7b-32768', // Free Groq model
                     'messages' => $messages,
                     'temperature' => 0.7,
-                    'max_tokens' => 500
+                    'max_tokens' => 500,
+                    'top_p' => 1
                 )),
                 'timeout' => 30
             )
         );
         
         if (is_wp_error($response)) {
-            return 'I apologize, but I couldn\'t process your request at this moment. Please try again.';
+            error_log('Groq API Error: ' . $response->get_error_message());
+            return $this->get_fallback_response($user_message);
         }
         
         $body = json_decode(wp_remote_retrieve_body($response), true);
         
         if (isset($body['choices'][0]['message']['content'])) {
             return $body['choices'][0]['message']['content'];
+        }
+        
+        // Log any API errors for debugging
+        if (isset($body['error'])) {
+            error_log('Groq API Error: ' . json_encode($body['error']));
         }
         
         return $this->get_fallback_response($user_message);
@@ -115,7 +123,7 @@ class AlexAPI {
         $consultant_name = get_option('alex_consultant_name', 'Alex');
         $consultant_title = get_option('alex_consultant_title', 'Senior Travel Advisor');
         
-        return "You are {$consultant_name}, a friendly and highly knowledgeable {$consultant_title} at a premium travel agency. 
+        return "You are {$consultant_name}, a friendly and highly knowledgeable {$consultant_title} at a premium travel agency.
         
 Your personality:
 - Professional yet warm and personable
@@ -157,6 +165,8 @@ Response guidelines:
             'Great choice! What\'s your budget range and how many people will be traveling?',
             'I love your travel idea! When are you planning to travel, and which service interests you most - flights, hotels, or a complete package?',
             'Perfect! To find you the best value, I need to know: what\'s your destination, when do you want to travel, and what\'s your budget?',
+            'Excellent! Let me help you plan an amazing trip. First, tell me - where would you love to go?',
+            'That\'s exciting! I\'d love to help you plan this trip. What\'s your ideal destination and when are you thinking of traveling?',
         );
         
         return $responses[array_rand($responses)];
@@ -211,13 +221,18 @@ Response guidelines:
             $data['travelers'] = $matches[1];
         }
         
+        // Look for travel dates
+        if (preg_match('/(?:in|on|during|around)\s+(\w+\s+\d+|\w+\s+\d+-\d+|\w+)/i', $user_message, $matches)) {
+            $data['travel_date'] = $matches[1];
+        }
+        
         // Look for travel type
         $service_keywords = array(
-            'flights' => array('flight', 'fly', 'plane', 'air'),
-            'hotels' => array('hotel', 'accommodation', 'stay', 'lodging'),
-            'cruises' => array('cruise', 'ship', 'sailing'),
-            'packages' => array('package', 'vacation', 'tour'),
-            'amtrak' => array('train', 'amtrak', 'rail')
+            'flights' => array('flight', 'fly', 'plane', 'air', 'flying'),
+            'hotels' => array('hotel', 'accommodation', 'stay', 'lodging', 'room'),
+            'cruises' => array('cruise', 'ship', 'sailing', 'ocean'),
+            'packages' => array('package', 'vacation', 'tour', 'all-inclusive'),
+            'amtrak' => array('train', 'amtrak', 'rail', 'railway')
         );
         
         $combined_text = strtolower($user_message . ' ' . $ai_response);
