@@ -1,6 +1,6 @@
 /* ============================================
    ALEX TRAVEL CONSULTANT - MAIN STYLES
-   Premium Luxury Gold Theme
+   Premium Luxury Gold Theme - Collapsible Version
    ============================================ */
 
 :root {
@@ -26,6 +26,12 @@
     z-index: 9999;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     animation: slideIn 0.5s ease-out;
+    transition: all 0.3s ease;
+}
+
+.alex-consultant-container.minimized {
+    width: 350px;
+    height: auto;
 }
 
 @keyframes slideIn {
@@ -47,6 +53,7 @@
     box-shadow: 0 10px 40px var(--alex-shadow);
     overflow: hidden;
     position: relative;
+    flex-direction: column;
 }
 
 .alex-3d-canvas {
@@ -80,7 +87,7 @@
 }
 
 /* ============================================
-   HEADER SECTION
+   HEADER SECTION (CLICKABLE)
    ============================================ */
 
 .alex-header {
@@ -91,6 +98,12 @@
     gap: 15px;
     align-items: flex-start;
     position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+
+.alex-header:hover {
+    opacity: 0.95;
 }
 
 .alex-avatar-container {
@@ -171,6 +184,7 @@
     overflow-y: auto;
     padding: 20px;
     background: var(--alex-white);
+    max-height: 450px;
 }
 
 .alex-messages-container {
@@ -219,7 +233,6 @@
 .alex-message-ai .message-content {
     background: #f0f0f0;
     padding: 12px 16px;
-    border-radius: 12px;
     border-radius: 12px 12px 12px 4px;
     font-size: 13px;
     line-height: 1.6;
@@ -289,6 +302,11 @@
     transform: translateY(-2px);
 }
 
+.quick-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* ============================================
    INPUT AREA
    ============================================ */
@@ -337,12 +355,12 @@
     font-weight: bold;
 }
 
-.alex-send-btn:hover {
+.alex-send-btn:hover:not(:disabled) {
     transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
 }
 
-.alex-send-btn:active {
+.alex-send-btn:active:not(:disabled) {
     transform: scale(0.98);
 }
 

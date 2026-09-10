@@ -1,6 +1,7 @@
 /**
  * ALEX TRAVEL CONSULTANT - Main JavaScript
  * Handles UI interactions, chat logic, and lead capture
+ * Fixed: Collapsible UI + AI Response Issues
  */
 
 (function() {
@@ -12,6 +13,7 @@
             this.messages = [];
             this.travelData = {};
             this.isWaitingResponse = false;
+            this.isMinimized = false;
             this.init();
         }
 
@@ -19,28 +21,69 @@
             this.cacheElements();
             this.bindEvents();
             this.initThreeJS();
+            this.startMinimized();
             console.log('🌍 Alex Travel Consultant Initialized');
         }
 
         cacheElements() {
             this.container = document.getElementById('alex-consultant-container');
+            this.wrapper = document.querySelector('.alex-consultant-wrapper');
             this.messagesContainer = document.getElementById('alex-messages');
             this.inputField = document.getElementById('alex-input');
             this.form = document.getElementById('alex-message-form');
             this.sendBtn = document.querySelector('.alex-send-btn');
             this.closeBtn = document.querySelector('.alex-close-btn');
+            this.header = document.querySelector('.alex-header');
             this.quickStartBtns = document.querySelectorAll('.quick-btn');
             this.detailsPanel = document.querySelector('.alex-details-panel');
             this.detailsContent = document.getElementById('alex-details-content');
             this.quickStartSection = document.getElementById('alex-quick-start');
+            this.consultantPanel = document.querySelector('.alex-consultant-panel');
         }
 
         bindEvents() {
             this.form.addEventListener('submit', (e) => this.handleSendMessage(e));
-            this.closeBtn.addEventListener('click', () => this.closeConsultant());
+            this.closeBtn.addEventListener('click', () => this.toggleMinimize());
+            this.header.addEventListener('click', (e) => {
+                if (e.target !== this.closeBtn && !this.closeBtn.contains(e.target)) {
+                    this.toggleMinimize();
+                }
+            });
             this.quickStartBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => this.handleQuickStart(e));
             });
+        }
+
+        startMinimized() {
+            // Start with minimized view
+            this.minimizeChat();
+        }
+
+        toggleMinimize() {
+            if (this.isMinimized) {
+                this.maximizeChat();
+            } else {
+                this.minimizeChat();
+            }
+        }
+
+        minimizeChat() {
+            this.isMinimized = true;
+            this.consultantPanel.style.display = 'none';
+            this.container.style.width = '350px';
+            this.container.style.height = 'auto';
+            this.wrapper.style.borderRadius = '8px';
+            this.closeBtn.innerHTML = '<span style="font-size: 20px;">▲</span>';
+        }
+
+        maximizeChat() {
+            this.isMinimized = false;
+            this.consultantPanel.style.display = 'flex';
+            this.container.style.width = '450px';
+            this.container.style.height = '700px';
+            this.wrapper.style.borderRadius = '16px';
+            this.closeBtn.innerHTML = '<span style="font-size: 20px;">▼</span>';
+            this.scrollToBottom();
         }
 
         handleSendMessage(e) {
@@ -57,21 +100,26 @@
             // Add user message
             this.addMessage(message, 'user');
             this.inputField.value = '';
+            this.inputField.focus();
             this.isWaitingResponse = true;
+            this.sendBtn.disabled = true;
+            this.sendBtn.style.opacity = '0.5';
 
             // Show typing indicator
             this.showTypingIndicator();
 
-            // Get AI response
-            this.fetchAIResponse(message);
+            // Get AI response after short delay
+            setTimeout(() => {
+                this.fetchAIResponse(message);
+            }, 500);
         }
 
         handleQuickStart(e) {
             const action = e.target.dataset.action;
             const messages = {
-                'flights': 'I\'m looking for flights',
-                'hotels': 'I need to book hotels',
-                'cruises': 'Tell me about cruise deals',
+                'flights': 'I\'m looking for flights to travel',
+                'hotels': 'I need to book hotels for my trip',
+                'cruises': 'Tell me about cruise deals available',
                 'packages': 'Show me vacation packages',
             };
 
@@ -126,13 +174,15 @@
             .then(result => {
                 this.removeTypingIndicator();
                 this.isWaitingResponse = false;
+                this.sendBtn.disabled = false;
+                this.sendBtn.style.opacity = '1';
 
-                if (result.success) {
-                    const response = result.data.response;
+                if (result.success && result.data) {
+                    const response = result.data.response || result.data.message || 'I apologize, but I could not process your request. Please try again.';
                     this.addMessage(response, 'ai');
 
                     // Extract and update travel data
-                    if (result.data.extracted_data) {
+                    if (result.data.extracted_data && Object.keys(result.data.extracted_data).length > 0) {
                         this.travelData = { ...this.travelData, ...result.data.extracted_data };
                         this.updateDetailsPanel();
                     }
@@ -140,14 +190,17 @@
                     // Check if we have enough info to show lead form
                     this.checkLeadReadiness();
                 } else {
-                    this.addMessage('Sorry, something went wrong. Please try again.', 'ai');
+                    const errorMsg = result.data?.message || 'Sorry, something went wrong. Please try again.';
+                    this.addMessage(errorMsg, 'ai');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 this.removeTypingIndicator();
                 this.isWaitingResponse = false;
-                this.addMessage('Sorry, I\'m having trouble connecting. Please try again.', 'ai');
+                this.sendBtn.disabled = false;
+                this.sendBtn.style.opacity = '1';
+                this.addMessage('Sorry, I\'m having trouble connecting. Please check your API key in settings and try again.', 'ai');
             });
         }
 
@@ -179,9 +232,17 @@
                     <div class="detail-value">${this.escapeHtml(this.travelData.service_type)}</div>
                 </div>`;
             }
+            if (this.travelData.travel_date) {
+                html += `<div class="detail-item">
+                    <div class="detail-label">📅 Travel Date</div>
+                    <div class="detail-value">${this.escapeHtml(this.travelData.travel_date)}</div>
+                </div>`;
+            }
 
-            this.detailsContent.innerHTML = html;
-            this.detailsPanel.classList.add('active');
+            if (html) {
+                this.detailsContent.innerHTML = html;
+                this.detailsPanel.classList.add('active');
+            }
         }
 
         checkLeadReadiness() {
@@ -193,7 +254,7 @@
                 const btn = document.createElement('button');
                 btn.id = 'alex-lead-form-btn';
                 btn.className = 'quick-btn';
-                btn.style.cssText = 'background: linear-gradient(135deg, #d4af37 0%, #c19e1a 100%); color: #1a1a1a; grid-column: 1/-1; margin-top: 8px; font-weight: 600;';
+                btn.style.cssText = 'background: linear-gradient(135deg, #d4af37 0%, #c19e1a 100%); color: #1a1a1a; grid-column: 1/-1; margin-top: 8px; font-weight: 600; cursor: pointer;';
                 btn.textContent = '📋 Get Me Best Offers';
                 btn.addEventListener('click', () => this.showLeadForm());
 
@@ -327,64 +388,68 @@
             const canvas = document.getElementById('alex-3d-canvas');
             if (!canvas || typeof THREE === 'undefined') return;
 
-            const width = canvas.clientWidth;
-            const height = canvas.clientHeight;
+            try {
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
 
-            const scene = new THREE.Scene();
-            scene.background = null;
+                const scene = new THREE.Scene();
+                scene.background = null;
 
-            const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-            camera.position.z = 5;
+                const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+                camera.position.z = 5;
 
-            const renderer = new THREE.WebGLRenderer({ 
-                canvas: canvas, 
-                alpha: true,
-                antialias: true 
-            });
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(window.devicePixelRatio);
+                const renderer = new THREE.WebGLRenderer({ 
+                    canvas: canvas, 
+                    alpha: true,
+                    antialias: true 
+                });
+                renderer.setSize(width, height);
+                renderer.setPixelRatio(window.devicePixelRatio);
 
-            // Create floating particles
-            const geometry = new THREE.BufferGeometry();
-            const particleCount = 30;
-            const positions = new Float32Array(particleCount * 3);
+                // Create floating particles
+                const geometry = new THREE.BufferGeometry();
+                const particleCount = 30;
+                const positions = new Float32Array(particleCount * 3);
 
-            for (let i = 0; i < particleCount * 3; i += 3) {
-                positions[i] = (Math.random() - 0.5) * 10;
-                positions[i + 1] = (Math.random() - 0.5) * 10;
-                positions[i + 2] = (Math.random() - 0.5) * 10;
+                for (let i = 0; i < particleCount * 3; i += 3) {
+                    positions[i] = (Math.random() - 0.5) * 10;
+                    positions[i + 1] = (Math.random() - 0.5) * 10;
+                    positions[i + 2] = (Math.random() - 0.5) * 10;
+                }
+
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+                const material = new THREE.PointsMaterial({
+                    color: 0xd4af37,
+                    size: 0.1,
+                    opacity: 0.3,
+                    transparent: true
+                });
+
+                const particles = new THREE.Points(geometry, material);
+                scene.add(particles);
+
+                // Animation loop
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    particles.rotation.x += 0.0002;
+                    particles.rotation.y += 0.0003;
+                    renderer.render(scene, camera);
+                };
+
+                animate();
+
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    const newWidth = canvas.clientWidth;
+                    const newHeight = canvas.clientHeight;
+                    camera.aspect = newWidth / newHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(newWidth, newHeight);
+                });
+            } catch (error) {
+                console.warn('3D effects not available:', error);
             }
-
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-            const material = new THREE.PointsMaterial({
-                color: 0xd4af37,
-                size: 0.1,
-                opacity: 0.3,
-                transparent: true
-            });
-
-            const particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-
-            // Animation loop
-            const animate = () => {
-                requestAnimationFrame(animate);
-                particles.rotation.x += 0.0002;
-                particles.rotation.y += 0.0003;
-                renderer.render(scene, camera);
-            };
-
-            animate();
-
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                const newWidth = canvas.clientWidth;
-                const newHeight = canvas.clientHeight;
-                camera.aspect = newWidth / newHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(newWidth, newHeight);
-            });
         }
 
         escapeHtml(text) {
