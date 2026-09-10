@@ -1,0 +1,27 @@
+{
+  "name": "alex-travel-consultant-plugin",
+  "version": "1.0.0",
+  "description": "Premium AI Travel Consultant Plugin for WordPress with 3D immersive interface",
+  "author": "MyTripFares",
+  "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "travel",
+    "ai",
+    "chatbot",
+    "consultant",
+    "flights",
+    "hotels",
+    "cruises",
+    "booking"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidsimone2006-sketch/travel-ai-consultant-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/davidsimone2006-sketch/travel-ai-consultant-plugin/issues"
+  },
+  "homepage": "https://mytripfares.com"
+}
