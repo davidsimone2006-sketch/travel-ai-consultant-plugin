@@ -1,0 +1,490 @@
+/* ============================================
+   ALEX TRAVEL CONSULTANT - MAIN STYLES
+   Premium Luxury Gold Theme
+   ============================================ */
+
+:root {
+    --alex-gold: #d4af37;
+    --alex-dark: #1a1a1a;
+    --alex-light: #f5f5f5;
+    --alex-white: #ffffff;
+    --alex-accent: #2a2a2a;
+    --alex-shadow: rgba(0, 0, 0, 0.3);
+    --alex-border: #e0e0e0;
+}
+
+/* ============================================
+   CONTAINER & LAYOUT
+   ============================================ */
+
+.alex-consultant-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 450px;
+    height: 700px;
+    z-index: 9999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alex-consultant-wrapper {
+    display: flex;
+    height: 100%;
+    background: var(--alex-white);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px var(--alex-shadow);
+    overflow: hidden;
+    position: relative;
+}
+
+.alex-3d-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    z-index: 1;
+}
+
+.alex-consultant-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+    position: relative;
+}
+
+.alex-details-panel {
+    width: 0;
+    overflow: hidden;
+    border-left: 1px solid var(--alex-border);
+    transition: width 0.3s ease;
+    background: #fafafa;
+}
+
+.alex-details-panel.active {
+    width: 280px;
+}
+
+/* ============================================
+   HEADER SECTION
+   ============================================ */
+
+.alex-header {
+    background: linear-gradient(135deg, var(--alex-gold) 0%, var(--alex-dark) 100%);
+    color: var(--alex-white);
+    padding: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    position: relative;
+}
+
+.alex-avatar-container {
+    flex-shrink: 0;
+}
+
+.alex-avatar {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    border: 2px solid var(--alex-gold);
+}
+
+.alex-header-info {
+    flex: 1;
+}
+
+.alex-name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.alex-title {
+    margin: 4px 0 8px 0;
+    font-size: 12px;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+.alex-status {
+    display: inline-block;
+    font-size: 11px;
+    padding: 4px 8px;
+    background: rgba(76, 175, 80, 0.2);
+    border-radius: 12px;
+    color: #4caf50;
+}
+
+.alex-status.online::before {
+    content: '●';
+    margin-right: 4px;
+    color: #4caf50;
+}
+
+.alex-close-btn {
+    background: none;
+    border: none;
+    color: var(--alex-white);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.alex-close-btn:hover {
+    opacity: 1;
+}
+
+/* ============================================
+   CONVERSATION AREA
+   ============================================ */
+
+.alex-conversation {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: var(--alex-white);
+}
+
+.alex-messages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.alex-message {
+    display: flex;
+    gap: 10px;
+    animation: messageSlide 0.3s ease-out;
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alex-message-welcome .message-content {
+    background: linear-gradient(135deg, #f0f8ff 0%, #e8f5e9 100%);
+    border-left: 4px solid var(--alex-gold);
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.alex-message-welcome h3 {
+    margin: 0 0 8px 0;
+    color: var(--alex-dark);
+    font-size: 16px;
+}
+
+.alex-message-welcome p {
+    margin: 6px 0;
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+}
+
+.alex-message-ai .message-content {
+    background: #f0f0f0;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border-radius: 12px 12px 12px 4px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--alex-dark);
+    max-width: 85%;
+}
+
+.alex-message-user {
+    justify-content: flex-end;
+}
+
+.alex-message-user .message-content {
+    background: linear-gradient(135deg, var(--alex-gold) 0%, #c19e1a 100%);
+    color: var(--alex-dark);
+    padding: 12px 16px;
+    border-radius: 12px 12px 4px 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 85%;
+    font-weight: 500;
+}
+
+.message-content {
+    word-wrap: break-word;
+}
+
+/* ============================================
+   QUICK START BUTTONS
+   ============================================ */
+
+.alex-quick-start {
+    padding: 12px 20px;
+    background: #fafafa;
+    border-top: 1px solid var(--alex-border);
+}
+
+.quick-start-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+}
+
+.quick-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.quick-btn {
+    background: var(--alex-white);
+    border: 1px solid var(--alex-border);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--alex-dark);
+    font-weight: 500;
+}
+
+.quick-btn:hover {
+    background: var(--alex-gold);
+    color: var(--alex-dark);
+    border-color: var(--alex-gold);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   INPUT AREA
+   ============================================ */
+
+.alex-input-area {
+    padding: 12px 16px;
+    border-top: 1px solid var(--alex-border);
+    background: var(--alex-white);
+}
+
+.alex-message-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.alex-input {
+    flex: 1;
+    border: 1px solid var(--alex-border);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.alex-input:focus {
+    outline: none;
+    border-color: var(--alex-gold);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.alex-send-btn {
+    background: linear-gradient(135deg, var(--alex-gold) 0%, #c19e1a 100%);
+    border: none;
+    color: var(--alex-dark);
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.alex-send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.alex-send-btn:active {
+    transform: scale(0.98);
+}
+
+.alex-disclaimer {
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+    margin: 0;
+}
+
+/* ============================================
+   DETAILS PANEL
+   ============================================ */
+
+.details-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--alex-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.details-header h3 {
+    margin: 0;
+    font-size: 14px;
+    color: var(--alex-dark);
+}
+
+.details-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #999;
+}
+
+.details-content {
+    padding: 16px;
+    font-size: 13px;
+}
+
+.empty-state {
+    color: #999;
+    font-style: italic;
+}
+
+.detail-item {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--alex-border);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--alex-dark);
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #666;
+}
+
+.detail-value {
+    margin-top: 4px;
+    color: var(--alex-dark);
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .alex-consultant-container {
+        width: 100vw;
+        height: 100vh;
+        bottom: 0;
+        right: 0;
+        border-radius: 0;
+    }
+    
+    .alex-details-panel.active {
+        width: 100%;
+    }
+    
+    .quick-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   ANIMATIONS & EFFECTS
+   ============================================ */
+
+.alex-typing {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.alex-typing span {
+    width: 8px;
+    height: 8px;
+    background: var(--alex-gold);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.alex-typing span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.alex-typing span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-10px);
+    }
+}
+
+/* Scrollbar styling */
+.alex-conversation::-webkit-scrollbar {
+    width: 6px;
+}
+
+.alex-conversation::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.alex-conversation::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.alex-conversation::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
